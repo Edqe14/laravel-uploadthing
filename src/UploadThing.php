@@ -60,7 +60,7 @@ class UploadThing
 
         $json = json_decode($res->getBody(), true);
 
-        if ($json['error'] ?? false) {
+        if (isset($json['error']) && !empty($json['error'])) {
             throw UploadThingException::fromResponse($res);
         }
 
@@ -69,6 +69,32 @@ class UploadThing
         }, $files, array_keys($files));
 
         return $uploads;
+    }
+
+    /**
+     * The function `deleteFiles` deletes one or more files by sending a POST request to an API
+     * endpoint and returns the response as JSON.
+     * 
+     * @param string $keys The parameter `keys` can be either a string or an array of strings. It represents the
+     * file keys that need to be deleted. If it is a string, it will be converted to an array with a
+     * single element. If it is an array, it will be used as is.
+     */
+    public function deleteFiles(string|array $keys) {
+        if (!is_array($keys)) $keys = [$keys];
+
+        $res = $this->http->request('POST', '/api/deleteFile', [
+            "body" => json_encode([
+                "fileKeys" => $keys,
+            ]),
+        ]);
+
+        $json = json_decode($res->getBody(), true);
+
+        if ($res->getReasonPhrase() !== 'OK' || (isset($json['error']) && !empty($json['error']))) {
+            throw new UploadThingException($json['error'] ?? 'An unknown error occured while deleting files.', 'INTERNAL_SERVER_ERROR');
+        }
+
+        return $json;
     }
 
     private function uploadFile(UploadedFile $file, array $data, string $contentDisposition = 'inline') {
