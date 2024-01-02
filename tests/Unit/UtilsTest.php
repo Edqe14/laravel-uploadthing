@@ -3,11 +3,6 @@
 use UploadThing\Utils;
 
 describe('utils', function() {
-  test('generate url', function() {
-    expect(Utils::generateUrl('/test'))->toBe('https://uploadthing.com/test');
-    expect(Utils::generateUrl('/test/123'))->toBe('https://uploadthing.com/test/123');
-  });
-
   test('exponential', function() {
     function cb() {
       return 'test';

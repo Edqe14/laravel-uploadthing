@@ -3,20 +3,6 @@
 namespace UploadThing;
 
 class Utils {
-  public static $host = 'https://uploadthing.com';
-
-  /**
-   * The function generates a URL by concatenating the host and the given path.
-   * 
-   * @param string $path A string that represents the path or endpoint of a URL. It is
-   * used to construct a complete URL by appending it to the host.
-   * 
-   * @return string the concatenation of the static variable `$host` and the parameter `$path`.
-   */
-  public static function generateUrl(string $path) {
-    return self::$host . $path;
-  }
-
   /**
    * The function `withExponentialBackoff` retries a given callback function with an increasing delay
    * between retries, up to a maximum number of retries and maximum delay time.

@@ -8,7 +8,8 @@
             "UploadThing\\": "src/"
         },
         "files": [
-            "src/lib/Utils.php"
+            "src/lib/Utils.php",
+            "src/lib/Http.php"
         ]
     },
     "authors": [
@@ -24,5 +25,9 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true
         }
+    },
+    "require": {
+        "illuminate/http": "^10.39",
+        "guzzlehttp/guzzle": "^7.8"
     }
 }
