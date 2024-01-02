@@ -3,7 +3,6 @@
 namespace UploadThing;
 
 use Illuminate\Http\UploadedFile;
-use stdClass;
 use UploadThing\Structs\FileList;
 use UploadThing\Structs\FileListEntry;
 use UploadThing\Structs\UploadedData;
@@ -112,6 +111,21 @@ class UploadThing
         $res = $this->requestUT('/api/listFiles', (object) $data, 'An unknown error occured while listing files.');
 
         return new FileList($res['files'], $res['hasMore']);
+    }
+
+    /**
+     * The function `renameFiles` sends a request to rename files using the provided updates and
+     * returns an error message if an unknown error occurs.
+     * 
+     * @param array $updates An array of updates to be made to the files. Each update should be an
+     * associative array with the following keys:
+     * - `fileKey` - The key of the file to be renamed.
+     * - `newName` - The new name of the file.
+     */
+    public function renameFiles(array $updates) {
+        return $this->requestUT('/api/renameFile', [
+            "updates" => $updates,
+        ], 'An unknown error occured while renaming files.');
     }
 
     private function requestUT(string $path, mixed $data = [], $fallbackErr = "An unknown error occured.") {
