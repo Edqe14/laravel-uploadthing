@@ -1,0 +1,25 @@
+{
+    "name": "edqe/laravel-uploadthing",
+    "description": "UploadThing PHP/Laravel driver",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "UploadThing\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Edqe14",
+            "email": "34704796+Edqe14@users.noreply.github.com"
+        }
+    ],
+    "require-dev": {
+        "pestphp/pest": "^2.30"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
+}
