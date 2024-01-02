@@ -6,7 +6,10 @@
     "autoload": {
         "psr-4": {
             "UploadThing\\": "src/"
-        }
+        },
+        "files": [
+            "src/lib/Utils.php"
+        ]
     },
     "authors": [
         {
