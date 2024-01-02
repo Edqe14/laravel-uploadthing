@@ -1,6 +1,6 @@
 {
     "name": "edqe/laravel-uploadthing",
-    "description": "UploadThing PHP/Laravel driver",
+    "description": "UploadThing Laravel driver",
     "type": "library",
     "license": "MIT",
     "autoload": {
