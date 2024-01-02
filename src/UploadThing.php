@@ -3,6 +3,8 @@
 namespace UploadThing;
 
 use Illuminate\Http\UploadedFile;
+use UploadThing\Structs\UploadedData;
+use UploadThing\Structs\UploadThingException;
 
 class UploadThing
 {
@@ -13,6 +15,24 @@ class UploadThing
         $this->http = new HttpClient($this->apiKey);
     }
 
+    /**
+     * The function `upload` takes in one or multiple files, along with optional metadata and content
+     * disposition, and uploads them to a server using a POST request.
+     * 
+     * @param UploadedFile $files The `files` parameter can accept either an `UploadedFile` object or an
+     * array of `UploadedFile` objects. An `UploadedFile` object represents a file that has been
+     * uploaded through a form.
+     * @param array $metadata The `metadata` parameter is an optional array that allows you to provide
+     * additional information or attributes about the uploaded file(s). This can be useful for
+     * categorizing or organizing the files, adding tags, or storing any other relevant data associated
+     * with the files. The metadata array can contain key-value pairs where the
+     * @param string $contentDisposition The `contentDisposition` parameter is used to specify how the
+     * uploaded file should be handled by the server. It can have two possible values:
+     * - `inline` - The file should be displayed inline in the browser, if possible.
+     * - `attachment` - The file should be downloaded and saved locally.
+     * 
+     * @return array<int,UploadedData> Uploaded files data
+     */
     public function upload(UploadedFile|array $files, array $metadata = [], string $contentDisposition = 'inline') 
     {
         $files = is_array($files) ? $files : [$files];
@@ -88,12 +108,7 @@ class UploadThing
 
         $this->pollForFileData("/api/pollUpload/".$key);
 
-        return [
-            "key" => $key,
-            "url" => $fileUrl,
-            "name" => $file->getClientOriginalName(),
-            "size" => $file->getSize(),
-        ];
+        return new UploadedData($key, $fileUrl, $file->getClientOriginalName(), $file->getSize());
     }
 
     private function pollForFileData(string $url) {

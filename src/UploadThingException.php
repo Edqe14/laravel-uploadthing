@@ -1,6 +1,6 @@
 <?php
 
-namespace UploadThing;
+namespace UploadThing\Structs;
 
 use Psr\Http\Message\ResponseInterface;
 
