@@ -3,6 +3,9 @@
 namespace UploadThing;
 
 use Illuminate\Http\UploadedFile;
+use stdClass;
+use UploadThing\Structs\FileList;
+use UploadThing\Structs\FileListEntry;
 use UploadThing\Structs\UploadedData;
 use UploadThing\Structs\UploadThingException;
 
@@ -82,16 +85,44 @@ class UploadThing
     public function deleteFiles(string|array $keys) {
         if (!is_array($keys)) $keys = [$keys];
 
-        $res = $this->http->request('POST', '/api/deleteFile', [
-            "body" => json_encode([
-                "fileKeys" => $keys,
-            ]),
+        return $this->requestUT('/api/deleteFile', [
+            "fileKeys" => $keys,
+        ], 'An unknown error occured while deleting files.');
+    }
+
+    /**
+     * The function `listFiles` sends a request to the `/api/listFiles` endpoint with optional limit
+     * and offset parameters to retrieve a list of files.
+     * 
+     * @param ?int $limit The "limit" parameter is used to specify the maximum number of files to be returned
+     * in the list. It is an optional parameter, so if it is not provided or set to null, there will be
+     * no limit on the number of files returned.
+     * @param ?int $offset The offset parameter is used to specify the starting point or position in a list
+     * of files. It determines the number of files to skip before starting to return the files. For
+     * example, if the offset is set to 10, the function will start returning files from the 11th file
+     * onwards.
+     * 
+     * @return array<int,FileListEntry> List of files
+     */
+    public function listFiles(?int $limit = null, ?int $offset = null) {
+        $data = [];
+        if ($limit !== null) $data['limit'] = $limit;
+        if ($offset !== null) $data['offset'] = $offset;
+
+        $res = $this->requestUT('/api/listFiles', (object) $data, 'An unknown error occured while listing files.');
+
+        return new FileList($res['files'], $res['hasMore']);
+    }
+
+    private function requestUT(string $path, mixed $data = [], $fallbackErr = "An unknown error occured.") {
+        $res = $this->http->request('POST', $path, [
+            "body" => json_encode($data),
         ]);
 
         $json = json_decode($res->getBody(), true);
 
         if ($res->getReasonPhrase() !== 'OK' || (isset($json['error']) && !empty($json['error']))) {
-            throw new UploadThingException($json['error'] ?? 'An unknown error occured while deleting files.', 'INTERNAL_SERVER_ERROR');
+            throw new UploadThingException($json['error'] ?? $fallbackErr, 'INTERNAL_SERVER_ERROR');
         }
 
         return $json;

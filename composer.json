@@ -5,7 +5,8 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "UploadThing\\": "src/"
+            "UploadThing\\": "src/",
+            "UploadThing\\Structs\\": "src/structs/"
         },
         "files": [
             "src/lib/Utils.php",
