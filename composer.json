@@ -1,7 +1,6 @@
 {
     "name": "edqe/laravel-uploadthing",
     "description": "UploadThing Laravel driver",
-    "version": "0.0.1",
     "type": "library",
     "license": "MIT",
     "autoload": {
@@ -29,6 +28,7 @@
         }
     },
     "require": {
+        "php": ">=8.0",
         "illuminate/http": "^10.39",
         "guzzlehttp/guzzle": "^7.8"
     }
