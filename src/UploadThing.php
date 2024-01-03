@@ -172,8 +172,6 @@ class UploadThing
     {
         $res = $this->requestUT('/api/getUsageInfo', [], 'An unknown error occured while getting usage info.');
 
-        var_dump($res);
-
         return UsageInfo::fromArray($res);
     }
 
