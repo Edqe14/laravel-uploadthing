@@ -9,5 +9,6 @@ class UploadedData
     public string $url,
     public string $name,
     public int $size,
-  ) {}
+  ) {
+  }
 }

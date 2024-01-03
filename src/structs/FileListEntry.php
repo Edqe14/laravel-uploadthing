@@ -2,9 +2,11 @@
 
 namespace UploadThing\Structs;
 
-class FileListEntry {
+class FileListEntry
+{
   public function __construct(
     public string $id,
     public string $key,
-  ) {}
+  ) {
+  }
 }

@@ -5,14 +5,16 @@ namespace UploadThing;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\GuzzleException;
 
-class HttpClient {
+class HttpClient
+{
   const UT_VERSION = "6.1.0";
   const HOST = 'https://uploadthing.com';
 
   public array $headers;
   public GuzzleClient $client;
 
-  public function __construct(string $apiKey) {
+  public function __construct(string $apiKey)
+  {
     $this->headers = [
       "Content-Type" => "application/json",
       "x-uploadthing-api-key" => $apiKey,
@@ -40,7 +42,8 @@ class HttpClient {
    * 
    * @throws GuzzleException
    */
-  public function request(string $method, string $path, array $options = []) {
+  public function request(string $method, string $path, array $options = [])
+  {
     $options["headers"] = $this->headers;
     $options["cache"] = "no-store";
 

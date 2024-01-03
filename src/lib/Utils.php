@@ -2,7 +2,8 @@
 
 namespace UploadThing;
 
-class Utils {
+class Utils
+{
   /**
    * The function `withExponentialBackoff` retries a given callback function with an increasing delay
    * between retries, up to a maximum number of retries and maximum delay time.
