@@ -21,3 +21,5 @@ jobs:
 
       - name: Tests
         run: ./vendor/bin/pest
+        env:
+          UPLOADTHING_API_KEY: ${{ secrets.UPLOADTHING_API_KEY }}
