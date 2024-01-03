@@ -3,8 +3,8 @@
 namespace UploadThing;
 
 use Illuminate\Http\UploadedFile;
-use UploadThing\Structs\FileList;
-use UploadThing\Structs\FileListEntry;
+use UploadThing\Structs\FilesList;
+use UploadThing\Structs\FileUrlList;
 use UploadThing\Structs\UploadedData;
 use UploadThing\Structs\UploadThingException;
 
@@ -21,7 +21,7 @@ class UploadThing
      * The function `upload` takes in one or multiple files, along with optional metadata and content
      * disposition, and uploads them to a server using a POST request.
      * 
-     * @param UploadedFile $files The `files` parameter can accept either an `UploadedFile` object or an
+     * @param UploadedFile|UploadedFile[] $files The `files` parameter can accept either an `UploadedFile` object or an
      * array of `UploadedFile` objects. An `UploadedFile` object represents a file that has been
      * uploaded through a form.
      * @param array $metadata The `metadata` parameter is an optional array that allows you to provide
@@ -33,14 +33,14 @@ class UploadThing
      * - `inline` - The file should be displayed inline in the browser, if possible.
      * - `attachment` - The file should be downloaded and saved locally.
      * 
-     * @return array<int,UploadedData> Uploaded files data
+     * @return UploadedData[] Uploaded files data
      */
-    public function upload(UploadedFile|array $files, array $metadata = [], string $contentDisposition = 'inline') 
+    public function upload(UploadedFile|array $files, array $metadata = [], string $contentDisposition = 'inline')
     {
         $files = is_array($files) ? $files : [$files];
 
         // request presigned url
-        $fileData = array_map(function(UploadedFile $file) {
+        $fileData = array_map(function (UploadedFile $file) {
             return [
                 "name" => $file->getClientOriginalName(),
                 "size" => $file->getSize(),
@@ -66,7 +66,7 @@ class UploadThing
             throw UploadThingException::fromResponse($res);
         }
 
-        $uploads = array_map(function($file, $i) use ($json, $contentDisposition) {
+        $uploads = array_map(function ($file, $i) use ($json, $contentDisposition) {
             return $this->uploadFile($file, $json['data'][$i], $contentDisposition);
         }, $files, array_keys($files));
 
@@ -77,16 +77,21 @@ class UploadThing
      * The function `deleteFiles` deletes one or more files by sending a POST request to an API
      * endpoint and returns the response as JSON.
      * 
-     * @param string $keys The parameter `keys` can be either a string or an array of strings. It represents the
+     * @param string|string[] $keys The parameter `keys` can be either a string or an array of strings. It represents the
      * file keys that need to be deleted. If it is a string, it will be converted to an array with a
      * single element. If it is an array, it will be used as is.
+     * 
+     * @return bool The response from the API endpoint as JSON.
      */
-    public function deleteFiles(string|array $keys) {
+    public function deleteFiles(string|array $keys)
+    {
         if (!is_array($keys)) $keys = [$keys];
 
-        return $this->requestUT('/api/deleteFile', [
+        $res = $this->requestUT('/api/deleteFile', [
             "fileKeys" => $keys,
         ], 'An unknown error occured while deleting files.');
+
+        return $res['success'];
     }
 
     /**
@@ -101,16 +106,17 @@ class UploadThing
      * example, if the offset is set to 10, the function will start returning files from the 11th file
      * onwards.
      * 
-     * @return array<int,FileListEntry> List of files
+     * @return FilesList List of files
      */
-    public function listFiles(?int $limit = null, ?int $offset = null) {
+    public function listFiles(?int $limit = null, ?int $offset = null)
+    {
         $data = [];
         if ($limit !== null) $data['limit'] = $limit;
         if ($offset !== null) $data['offset'] = $offset;
 
         $res = $this->requestUT('/api/listFiles', (object) $data, 'An unknown error occured while listing files.');
 
-        return new FileList($res['files'], $res['hasMore']);
+        return FilesList::fromArray($res);
     }
 
     /**
@@ -121,14 +127,45 @@ class UploadThing
      * associative array with the following keys:
      * - `fileKey` - The key of the file to be renamed.
      * - `newName` - The new name of the file.
+     * 
+     * @return bool The response from the API endpoint as JSON.
      */
-    public function renameFiles(array $updates) {
-        return $this->requestUT('/api/renameFile', [
+    public function renameFiles(array $updates)
+    {
+        $res = $this->requestUT('/api/renameFile', [
             "updates" => $updates,
         ], 'An unknown error occured while renaming files.');
+
+        return $res['success'];
     }
 
-    private function requestUT(string $path, mixed $data = [], $fallbackErr = "An unknown error occured.") {
+    /**
+     * The getFileUrls function takes in a string or an array of file keys and returns the file URLs.
+     * 
+     * @param string|string[] keys The parameter "keys" can be either a string or an array. It represents the
+     * file keys for which you want to retrieve the file URLs. If it is a string, it will be converted
+     * to an array with a single element.
+     * 
+     * @return FileUrlList[] the file URLs for the given keys.
+     */
+    public function getFileUrls(string|array $keys)
+    {
+        if (!is_array($keys)) $keys = [$keys];
+
+        $res = $this->requestUT('/api/getFileUrl', [
+            "fileKeys" => $keys,
+        ], 'An unknown error occured while getting file URLs.');
+
+        return array_map(function ($file) {
+            return FileUrlList::fromArray($file);
+        }, $res['data']);
+    }
+
+    /**
+     * @throws UploadThingException
+     */
+    private function requestUT(string $path, mixed $data = [], $fallbackErr = "An unknown error occured.")
+    {
         $res = $this->http->request('POST', $path, [
             "body" => json_encode($data),
         ]);
@@ -142,12 +179,13 @@ class UploadThing
         return $json;
     }
 
-    private function uploadFile(UploadedFile $file, array $data, string $contentDisposition = 'inline') {
+    private function uploadFile(UploadedFile $file, array $data, string $contentDisposition = 'inline')
+    {
         [
-            'presignedUrls' => $presignedUrls, 
-            'key' => $key, 
-            'fileUrl' => $fileUrl, 
-            'uploadId' => $uploadId, 
+            'presignedUrls' => $presignedUrls,
+            'key' => $key,
+            'fileUrl' => $fileUrl,
+            'uploadId' => $uploadId,
             'chunkSize' => $chunkSize
         ] = $data;
 
@@ -156,7 +194,7 @@ class UploadThing
         }
 
         $data = $file->get();
-        $etags = array_map(function($url, $i) use ($key, $file, $chunkSize, $data, $contentDisposition) {
+        $etags = array_map(function ($url, $i) use ($key, $file, $chunkSize, $data, $contentDisposition) {
             $offset = $chunkSize * $i;
             $end = min($offset + $chunkSize, $file->getSize());
             $chunk = substr($data, $offset, $end);
@@ -177,13 +215,14 @@ class UploadThing
             ]),
         ]);
 
-        $this->pollForFileData("/api/pollUpload/".$key);
+        $this->pollForFileData("/api/pollUpload/" . $key);
 
         return new UploadedData($key, $fileUrl, $file->getClientOriginalName(), $file->getSize());
     }
 
-    private function pollForFileData(string $url) {
-        return Utils::withExponentialBackoff(function() use ($url) {
+    private function pollForFileData(string $url)
+    {
+        return Utils::withExponentialBackoff(function () use ($url) {
             $res = $this->http->request('GET', $url);
             $maybeJson = json_decode($res->getBody(), true);
 
@@ -199,7 +238,8 @@ class UploadThing
         });
     }
 
-    private function uploadPart(string $url, string $data, string $key, string $type, string $contentDisposition, string $fileName, int $retry = 0, int $maxRetries = 5) {
+    private function uploadPart(string $url, string $data, string $key, string $type, string $contentDisposition, string $fileName, int $retry = 0, int $maxRetries = 5)
+    {
         $res = $this->http->request('PUT', $url, [
             "body" => $data,
             "headers" => [

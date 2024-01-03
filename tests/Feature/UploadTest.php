@@ -1,16 +1,17 @@
 <?php
 
 use Illuminate\Http\UploadedFile;
-use UploadThing\Structs\FileList;
 use UploadThing\Structs\FileListEntry;
+use UploadThing\Structs\FilesList;
+use UploadThing\Structs\FileUrlList;
 use UploadThing\Structs\UploadedData;
 use UploadThing\UploadThing;
 
 global $client;
 $client = new UploadThing(getenv('UPLOADTHING_API_KEY'));
 
-describe('creating', function() {
-  test('text file', function() {
+describe('creating', function () {
+  test('text file', function () {
     global $client;
 
     $file = new UploadedFile(__DIR__ . '/upload_test.txt', 'upload_test.txt', 'text/plain', null, true);
@@ -42,13 +43,13 @@ describe('creating', function() {
 });
 
 
-describe('reading', function() {
-  test('list', function() {
+describe('reading', function () {
+  test('list', function () {
     global $client, $list;
-    
+
     $res = $client->listFiles();
 
-    expect($res)->toBeInstanceOf(FileList::class);
+    expect($res)->toBeInstanceOf(FilesList::class);
 
     if (count($res->files) > 0) {
       expect($res->files[0])->toBeInstanceOf(FileListEntry::class);
@@ -58,10 +59,23 @@ describe('reading', function() {
 
     $list = $res->files;
   });
+
+  test('file urls', function () {
+    global $client, $list;
+
+    $data = array_map(function (FileListEntry $list) {
+      return $list->key;
+    }, $list);
+
+    $res = $client->getFileUrls($data);
+
+    expect($res)->toBeArray();
+    expect($res[0])->toBeInstanceOf(FileUrlList::class);
+  });
 });
 
-describe('updating', function() {
-  test('rename', function() {
+describe('updating', function () {
+  test('rename', function () {
     global $list, $client;
 
     $data = array_map(function (FileListEntry $list) {
@@ -74,13 +88,12 @@ describe('updating', function() {
     }, $list);
 
     $res = $client->renameFiles($data);
-    expect($res)->toBeArray();
-    expect($res['success'])->toBeBool();
+    expect($res)->toBeBool();
   });
 });
 
-describe('deleting', function() {
-  test('delete', function() {
+describe('deleting', function () {
+  test('delete', function () {
     global $list, $client;
 
     $data = array_map(function (FileListEntry $list) {
@@ -88,7 +101,6 @@ describe('deleting', function() {
     }, $list);
 
     $res = $client->deleteFiles($data);
-    expect($res)->toBeArray();
-    expect($res['success'])->toBeBool();
+    expect($res)->toBeBool();
   });
 });
