@@ -7,6 +7,7 @@ use UploadThing\Structs\FilesList;
 use UploadThing\Structs\FileUrlList;
 use UploadThing\Structs\UploadedData;
 use UploadThing\Structs\UploadThingException;
+use UploadThing\Structs\UsageInfo;
 
 class UploadThing
 {
@@ -159,6 +160,21 @@ class UploadThing
         return array_map(function ($file) {
             return FileUrlList::fromArray($file);
         }, $res['data']);
+    }
+
+    /**
+     * The function retrieves usage information from an API and returns it as a UsageInfo object.
+     * 
+     * @return UsageInfo an instance of the UsageInfo class, which is created from the response received from the
+     * requestUT method.
+     */
+    public function getUsageInfo()
+    {
+        $res = $this->requestUT('/api/getUsageInfo', [], 'An unknown error occured while getting usage info.');
+
+        var_dump($res);
+
+        return UsageInfo::fromArray($res);
     }
 
     /**

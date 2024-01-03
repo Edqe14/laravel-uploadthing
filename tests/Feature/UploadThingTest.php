@@ -5,6 +5,7 @@ use UploadThing\Structs\FileListEntry;
 use UploadThing\Structs\FilesList;
 use UploadThing\Structs\FileUrlList;
 use UploadThing\Structs\UploadedData;
+use UploadThing\Structs\UsageInfo;
 use UploadThing\UploadThing;
 
 global $client;
@@ -103,4 +104,12 @@ describe('deleting', function () {
     $res = $client->deleteFiles($data);
     expect($res)->toBeBool();
   });
+});
+
+test('usage info', function () {
+  global $client;
+
+  $res = $client->getUsageInfo();
+
+  expect($res)->toBeInstanceOf(UsageInfo::class);
 });
