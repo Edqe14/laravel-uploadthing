@@ -3,7 +3,8 @@
 
   <p>Simple PHP port of <a href="https://docs.uploadthing.com/">UploadThing's UTApi library</a></p>
 
-  ![GitHub License](https://img.shields.io/github/license/Edqe14/laravel-uploadthing)
+![GitHub License](https://img.shields.io/github/license/Edqe14/laravel-uploadthing)
+
 </div>
 
 ## 📥 Installation
@@ -31,9 +32,17 @@ $uploadThing->renameFiles([
   ["fileKey" => "fileKey1", "newName" => "newName2"],
   ["fileKey" => "fileKey2", "newName" => "newName2"]
 ]);
+// or
+$uploadThing->renameFile(["fileKey" => "fileKey1", "newName" => "newName2"]);
 
 // Delete files
 $uploadThing->deleteFiles(["fileKey1", "fileKey2"]);
+
+// Get file urls
+$uploadThing->getFileUrls(["fileKey1", "fileKey2"]);
+
+// Get usage stats
+$uploadThing->getUsageInfo();
 ```
 
 ## 📄 License
