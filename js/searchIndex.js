@@ -41,16 +41,6 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/UploadThing-HttpClient.html#property_client"
         },                {
-            "fqsen": "\\UploadThing\\Utils",
-            "name": "Utils",
-            "summary": "",
-            "url": "classes/UploadThing-Utils.html"
-        },                {
-            "fqsen": "\\UploadThing\\Utils\u003A\u003AwithExponentialBackoff\u0028\u0029",
-            "name": "withExponentialBackoff",
-            "summary": "The\u0020function\u0020\u0060withExponentialBackoff\u0060\u0020retries\u0020a\u0020given\u0020callback\u0020function\u0020with\u0020an\u0020increasing\u0020delay\nbetween\u0020retries,\u0020up\u0020to\u0020a\u0020maximum\u0020number\u0020of\u0020retries\u0020and\u0020maximum\u0020delay\u0020time.",
-            "url": "classes/UploadThing-Utils.html#method_withExponentialBackoff"
-        },                {
             "fqsen": "\\UploadThing\\Structs\\FileListEntry",
             "name": "FileListEntry",
             "summary": "",
@@ -295,6 +285,16 @@ Search.appendIndex(
             "name": "apiKey",
             "summary": "",
             "url": "classes/UploadThing-UploadThing.html#property_apiKey"
+        },                {
+            "fqsen": "\\UploadThing\\Utils",
+            "name": "Utils",
+            "summary": "",
+            "url": "classes/UploadThing-Utils.html"
+        },                {
+            "fqsen": "\\UploadThing\\Utils\u003A\u003AwithExponentialBackoff\u0028\u0029",
+            "name": "withExponentialBackoff",
+            "summary": "The\u0020function\u0020\u0060withExponentialBackoff\u0060\u0020retries\u0020a\u0020given\u0020callback\u0020function\u0020with\u0020an\u0020increasing\u0020delay\nbetween\u0020retries,\u0020up\u0020to\u0020a\u0020maximum\u0020number\u0020of\u0020retries\u0020and\u0020maximum\u0020delay\u0020time.",
+            "url": "classes/UploadThing-Utils.html#method_withExponentialBackoff"
         },                {
             "fqsen": "\\",
             "name": "\\",
