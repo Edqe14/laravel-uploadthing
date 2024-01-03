@@ -25,7 +25,7 @@ jobs:
         run: wget https://phpdoc.org/phpDocumentor.phar
 
       - name: Generate PHPDoc
-        run: php phpDocumentor.phar -d src -t docs
+        run: php phpDocumentor.phar run -d src -t docs
 
       - name: Deploy PHPDoc
         uses: JamesIves/github-pages-deploy-action@v4
