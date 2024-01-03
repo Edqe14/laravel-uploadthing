@@ -7,11 +7,7 @@
         "psr-4": {
             "UploadThing\\": "src/",
             "UploadThing\\Structs\\": "src/structs/"
-        },
-        "files": [
-            "src/lib/Utils.php",
-            "src/lib/Http.php"
-        ]
+        }
     },
     "authors": [
         {
