@@ -2,7 +2,6 @@
 
 namespace UploadThing;
 
-use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Promise;
 use Illuminate\Http\UploadedFile;
 use Psr\Http\Message\ResponseInterface;
@@ -38,6 +37,7 @@ class UploadThing
      * - `attachment` - The file should be downloaded and saved locally.
      * 
      * @return UploadedData[] Uploaded files data
+     * @throws UploadThingException
      */
     public function upload(UploadedFile|array $files, array $metadata = [], string $contentDisposition = 'inline')
     {
@@ -86,6 +86,7 @@ class UploadThing
      * single element. If it is an array, it will be used as is.
      * 
      * @return bool The response from the API endpoint as JSON.
+     * @throws UploadThingException
      */
     public function deleteFiles(string|array $keys)
     {
@@ -111,6 +112,7 @@ class UploadThing
      * onwards.
      * 
      * @return FilesList List of files
+     * @throws UploadThingException
      */
     public function listFiles(?int $limit = null, ?int $offset = null)
     {
@@ -133,6 +135,7 @@ class UploadThing
      * - `newName` - The new name of the file.
      * 
      * @return bool The response from the API endpoint as JSON.
+     * @throws UploadThingException
      */
     public function renameFiles(array $updates)
     {
@@ -151,6 +154,7 @@ class UploadThing
      * to an array with a single element.
      * 
      * @return FileUrlList[] the file URLs for the given keys.
+     * @throws UploadThingException
      */
     public function getFileUrls(string|array $keys)
     {
@@ -170,6 +174,7 @@ class UploadThing
      * 
      * @return UsageInfo an instance of the UsageInfo class, which is created from the response received from the
      * requestUT method.
+     * @throws UploadThingException
      */
     public function getUsageInfo()
     {
