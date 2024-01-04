@@ -7,7 +7,7 @@ use GuzzleHttp\Exception\GuzzleException;
 
 class HttpClient
 {
-  const UT_VERSION = "6.1.0";
+  const UT_VERSION = "6.1.1";
   const HOST = 'https://uploadthing.com';
 
   public array $headers;
@@ -44,10 +44,39 @@ class HttpClient
    */
   public function request(string $method, string $path, array $options = [])
   {
+    $options = $this->getOptions($options);
+
+    return $this->client->request($method, $path, $options);
+  }
+
+  /**
+   * The function `requestAsync` sends an asynchronous HTTP request using the specified method, path,
+   * and options.
+   * 
+   * @param string $method The HTTP method to be used for the request (e.g., GET, POST, PUT, DELETE,
+   * etc.).
+   * @param string $path The "path" parameter is a string that represents the URL path or endpoint that
+   * you want to make the asynchronous request to. It typically includes the domain name and any
+   * additional path segments that are required to access the desired resource. For example, if you
+   * want to make a request to the "/users"
+   * @param array $options The `options` parameter is an array that allows you to specify additional
+   * options for the request. These options can include things like headers, query parameters, request
+   * body, authentication credentials, etc. By passing an array of options, you can customize the
+   * behavior of the request according to your needs.
+   */
+  public function requestAsync(string $method, string $path, array $options = [])
+  {
+    $options = $this->getOptions($options);
+
+    return $this->client->requestAsync($method, $path, $options);
+  }
+
+  private function getOptions(array $options = [])
+  {
     $options["headers"] = $this->headers;
     $options["cache"] = "no-store";
 
-    return $this->client->request($method, $path, $options);
+    return $options;
   }
 
   /**

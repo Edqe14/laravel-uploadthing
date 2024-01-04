@@ -2,7 +2,10 @@
 
 namespace UploadThing;
 
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Promise;
 use Illuminate\Http\UploadedFile;
+use Psr\Http\Message\ResponseInterface;
 use UploadThing\Structs\FilesList;
 use UploadThing\Structs\FileUrlList;
 use UploadThing\Structs\UploadedData;
@@ -207,19 +210,32 @@ class UploadThing
             throw new UploadThingException('Failed to generate presigned URL', 'URL_GENERATION_FAILED');
         }
 
-        $data = $file->get();
-        $etags = array_map(function ($url, $i) use ($key, $file, $chunkSize, $data, $contentDisposition) {
-            $offset = $chunkSize * $i;
-            $end = min($offset + $chunkSize, $file->getSize());
-            $chunk = substr($data, $offset, $end);
+        $handle = fopen($file->getPathname(), 'r');
+        if (!$handle) {
+            throw new UploadThingException('Failed to open file', 'FILE_OPEN_FAILED');
+        }
 
-            $etag = $this->uploadPart($url, $chunk, $key, $file->getMimeType(), $contentDisposition, $file->getClientOriginalName());
+        $etags = array_map(function ($url, $i) use ($handle, $chunkSize, $key, $file, $contentDisposition) {
+            $data = fread($handle, $chunkSize);
 
-            return [
-                "tag" => $etag,
-                "partNumber" => $i + 1,
-            ];
+            if ($data === false) {
+                fclose($handle);
+                throw new UploadThingException('Failed to read file', 'FILE_READ_FAILED');
+            }
+
+            return $this->uploadPart($url, $data, $key, $file->getMimeType(), $contentDisposition, $file->getClientOriginalName())
+                ->then(function ($etag) use ($i) {
+                    return [
+                        "tag" => $etag,
+                        "partNumber" => $i + 1,
+                    ];
+                });
         }, $presignedUrls, array_keys($presignedUrls));
+
+        fclose($handle);
+        unset($handle);
+
+        $etags = Promise\Utils::unwrap($etags);
 
         $this->http->request('POST', '/api/completeMultipart', [
             "body" => json_encode([
@@ -254,7 +270,7 @@ class UploadThing
 
     private function uploadPart(string $url, string $data, string $key, string $type, string $contentDisposition, string $fileName, int $retry = 0, int $maxRetries = 5)
     {
-        $res = $this->http->request('PUT', $url, [
+        $resPromise = $this->http->requestAsync('PUT', $url, [
             "body" => $data,
             "headers" => [
                 "Content-Type" => $type,
@@ -266,29 +282,34 @@ class UploadThing
             ],
         ]);
 
-        if ($res->getReasonPhrase() === 'OK') {
-            $etag = $res->getHeaderLine('Etag');
-            if (empty($etag)) {
-                throw new UploadThingException("Missing Etag header from uploaded part", 'UPLOAD_FAILED');
+        return $resPromise->then(
+            function (ResponseInterface $res) {
+                if ($res->getReasonPhrase() === 'OK') {
+                    $etag = $res->getHeaderLine('Etag');
+                    if (empty($etag)) {
+                        throw new UploadThingException("Missing Etag header from uploaded part", 'UPLOAD_FAILED');
+                    }
+
+                    return preg_replace("/\"/", "", $etag);
+                }
+            },
+            function () use ($retry, $maxRetries, $url, $data, $type, $contentDisposition, $fileName, $key) {
+                if ($retry < $maxRetries) {
+                    $delay = 2 ** $retry;
+
+                    sleep($delay);
+
+                    return $this->uploadPart($url, $data, $type, $contentDisposition, $fileName, $retry + 1);
+                }
+
+                $this->http->requestAsync('POST', '/api/failureCallback', [
+                    "body" => json_encode([
+                        "fileKey" => $key,
+                    ])
+                ]);
+
+                throw new UploadThingException("Failed to upload file to storage provider", 'UPLOAD_FAILED');
             }
-
-            return preg_replace("/\"/", "", $etag);
-        }
-
-        if ($retry < $maxRetries) {
-            $delay = 2 ** $retry;
-
-            sleep($delay);
-
-            return $this->uploadPart($url, $data, $type, $contentDisposition, $fileName, $retry + 1);
-        }
-
-        $this->http->request('POST', '/api/failureCallback', [
-            "body" => json_encode([
-                "fileKey" => $key,
-            ])
-        ]);
-
-        throw new UploadThingException("Failed to upload file to storage provider", 'UPLOAD_FAILED');
+        );
     }
 }

@@ -19,6 +19,10 @@ jobs:
       - name: Install Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
+      - name: Download Test Files
+        run: |
+          curl -L https://github.com/kitsunebishi/Wallpapers/blob/main/images/00293.jpg?raw=true -o ./tests/Feature/upload_big_image.png
+
       - name: Tests
         run: ./vendor/bin/pest --coverage
         env:

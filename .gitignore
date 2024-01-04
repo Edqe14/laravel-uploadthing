@@ -1,3 +1,5 @@
 /vendor/
 .phpdoc
 docs
+
+tests/Feature/upload_big_image.png
